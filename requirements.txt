@@ -1,0 +1,9 @@
+black
+pytest
+pytest-cov
+pylint
+python-datamuse
+requests
+streamlit
+torch
+transformers
