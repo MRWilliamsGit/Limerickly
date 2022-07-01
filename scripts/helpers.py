@@ -22,13 +22,3 @@ def get_rhyme(word, many):
     
     #return list
     return l
-
-#initializes the model
-def get_model():
-
-    print("Downloading Model...")
-    model = TFBertForPreTraining.from_pretrained("sshleifer/distilbart-cnn-12-6")
-    tokenizer = BertTokenizer.from_pretrained("sshleifer/distilbart-cnn-12-6")
-    print("Download Complete")
-
-    return model, tokenizer
