@@ -3,7 +3,8 @@
 import requests
 import datamuse as dm
 
-from transformers import RobertaTokenizer, RobertaForMaskedLM
+#from transformers import TFBertForMaskedLM, BertTokenizer
+from transformers import RobertaForMaskedLM, RobertaTokenizer
 #import tensorflow as tf
 import torch
 import string
@@ -15,11 +16,14 @@ class limerickly():
         tokenizer=None,
         limerick=None
     ):
+  
         if model == None:
             self.model = RobertaForMaskedLM.from_pretrained('roberta-base')
+            #self.model = TFBertForMaskedLM.from_pretrained("bert-large-cased-whole-word-masking")
         
         if tokenizer == None:
             self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+            #self.tokenizer = BertTokenizer.from_pretrained("bert-large-cased-whole-word-masking")
 
         if limerick == None:
             self.limerick =[]
@@ -69,41 +73,53 @@ class limerickly():
         for r in rhymes:
             idea = line +", "+ideas + r
             l.append(idea)
-            #print(idea)
-
+    
         return l
+
+    # params: the line with a <mask> that indicates the word to predict
+    # returns: the predicted word
+    def get_prediction(self,this):
+
+        this_t = self.tokenizer(text=this, return_tensors='pt')
+        with torch.no_grad():
+            output = self.model(**this_t).logits
+
+        mask_token_index = (this_t.input_ids == self.tokenizer.mask_token_id)[0].nonzero(as_tuple=True)[0]
+        #predicted_token_id = output[0, mask_token_index].argmax(axis=-1)
+        hmmm = output[0, mask_token_index]
+        #predicted_token_id = hmmm.argmax(axis=-1)
+        #print(predicted_token_id)
+        #print(hmmm.topk(1,axis=-1)[1].squeeze(1))
+        predicted_token_id = hmmm.topk(1,axis=-1)[1].squeeze(1)
+        #print(predicted_token_id)
+        result = self.tokenizer.decode(predicted_token_id)
+
+        return(result)
+
     
     # params: how many ideas to return
     # returns: list of possible line pairs
     def get_sentences(self, num):
 
+        #get list of masked lines (different rhyme each)
         sen = self.prep_sentences(num)
         sendone = []
         
+        #for each line
         for s in sen:
-            token_ids = self.tokenizer.encode(text=s, return_tensors='pt')
-            masked_position = (token_ids.squeeze() == self.tokenizer.mask_token_id).nonzero()
-            masked_pos = [mask.item() for mask in masked_position ]
-
-            with torch.no_grad():
-                output = self.model(token_ids)
-
-            last_hidden_state = output[0].squeeze()
-
-            list_of_list =[]
-            for index,mask_index in enumerate(masked_pos):
-                mask_hidden_state = last_hidden_state[mask_index]
-                idx = torch.topk(mask_hidden_state, k=5, dim=0)[1]
-                words = [self.tokenizer.decode(i.item()).strip() for i in idx]
-                list_of_list.append(words)
-                #print ("Mask ",index+1,"Guesses : ",words)
-            
-            best_guess = ""
-            for j in list_of_list:
-                best_guess = best_guess+" "+j[0]
-            
-            print(best_guess + " "+ s.split()[-1])
-            #sendone.append[best_guess]
-
-        #print(sendone)
+            #predict the words a bit at a time from until there are no masks left
+            while s.count("<mask>")>0:
+                #if there are only one or two masked words, just do the whole line
+                if s.count("<mask>")<3:
+                    new = self.get_prediction(s)
+                    done = s.partition("<mask>")[0] + new + " " + s.split()[-1]
+                    s = done
+                    print(done)
+                #if there are more, do the first mask
+                else:
+                    #replace first mask with prediction
+                    this = s.partition("<mask>")[0] + "<mask>"
+                    new = self.get_prediction(this)
+                    s = s.replace("<mask>", new, 1)
+                    print(s)
 

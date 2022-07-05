@@ -5,8 +5,8 @@ from scripts.lim import limerickly
 
 def main():
     lim = limerickly()
-    lim.add_line("There once was a man from Philly")
-    rhymes = lim.get_sentences(5)
+    lim.add_line("frog in my soup")
+    rhymes = lim.get_sentences(1)
     #rhymes = get_rhyme("boast", 10)
     print(rhymes)
 
