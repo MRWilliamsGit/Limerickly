@@ -1,3 +1,5 @@
+#this version did one mask at a time alternating first and last
+
 import requests
 import datamuse as dm
 
@@ -95,52 +97,12 @@ class limerickly():
         done = ''
         for p in predicted_token_ids:
             result = self.tokenizer.decode(p)
-            print(result)
             if len(set.intersection(set(result), set(string.punctuation)))==0:
                 done = result
                 break
 
         return(done)
 
-    # params: the line with multiple <mask>
-    # returns: the line with the first and last mask replaced
-    def get_prediction_multiple(self,this):
-
-        #tokenize
-        token_ids = self.tokenizer.encode(text=this, return_tensors='pt')
-        masked_position = (token_ids.squeeze() == self.tokenizer.mask_token_id).nonzero()
-        masked_pos = [mask.item() for mask in masked_position ]
-
-        #get predictions
-        with torch.no_grad():
-            output = self.model(token_ids)
-        last_hidden_state = output[0].squeeze()
-
-        #pull out top five predicted words
-        list_of_list =[]
-        for index,mask_index in enumerate(masked_pos):
-            mask_hidden_state = last_hidden_state[mask_index]
-            idx = torch.topk(mask_hidden_state, k=5, dim=0)[1]
-            words = [self.tokenizer.decode(i.item()).strip() for i in idx]
-            list_of_list.append(words)
-
-        #replace first mask with the first predicted word (not punctuation or too long)
-        for w in list_of_list[0]:
-            if len(set.intersection(set(w), set(string.punctuation)))==0 & len(w) < 10:
-                new = this.replace("<mask>", w, 1)
-                break
-
-        #replace last mask with last predicted word
-        new = new[::-1]
-        for w in list_of_list[-1]:
-            if len(set.intersection(set(w), set(string.punctuation)))==0 & len(w) < 10:
-                w = w[::-1]
-                new = new.replace(">ksam<", w, 1)
-                break
-        new = new[::-1]
-
-        #return both lines
-        return(new)
     
     # params: how many ideas to return
     # returns: list of possible line pairs
@@ -148,6 +110,7 @@ class limerickly():
 
         #get list of masked lines (different rhyme each)
         sen = self.prep_sentences(num)
+        sendone = []
         
         #for each line
         for s in sen:
@@ -174,16 +137,4 @@ class limerickly():
                     s = s.replace(this, new + s.split("<mask>")[-1])
                     print(s)
 
-    def get_sentences2(self, num):
-
-        #get list of masked lines (different rhyme each)
-        sen = self.prep_sentences(num)
-        
-        #for each line
-        for s in sen:
-            #predict the first and last mask until there are no masks left
-            while s.count("<mask>")>0:
-                s = self.get_prediction_multiple(s)
-            
-            print(s)
 

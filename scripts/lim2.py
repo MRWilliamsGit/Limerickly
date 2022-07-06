@@ -1,3 +1,5 @@
+#this version retrieved all masks at once - doesn't make sense
+
 import requests
 import datamuse as dm
 
