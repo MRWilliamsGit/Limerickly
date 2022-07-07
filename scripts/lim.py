@@ -52,8 +52,15 @@ class limerickly():
 
         #get what line we are on
         lines = len(self.limerick)
-        #get the latest line
-        line = self.limerick[lines-1]
+
+        #different scheme for if on last line
+        if lines != 4:
+            #get the latest line
+            line = self.limerick[lines-1]
+        else:
+            #get the latest line
+            line = self.limerick[lines-3]
+
         #get the lenth of the latest line
         lenline = len(line.split())
         #get last word
@@ -67,7 +74,7 @@ class limerickly():
         l=[]
         ideas = "<mask> " * (lenline-1)
         for r in rhymes:
-            idea = line +", "+ideas + r
+            idea = self.limerick[lines-1] +" "+ideas + r
             l.append(idea)
     
         return l
@@ -174,16 +181,28 @@ class limerickly():
                     s = s.replace(this, new + s.split("<mask>")[-1])
                     print(s)
 
+    #params: how many rhymes to get
+    #returns: list of choices for second line
     def get_sentences2(self, num):
 
         #get list of masked lines (different rhyme each)
         sen = self.prep_sentences(num)
         
+        #initialize list of choices, first line is blank to indicate not chosen in app
+        choices = [" "]
+
         #for each line
         for s in sen:
             #predict the first and last mask until there are no masks left
             while s.count("<mask>")>0:
                 s = self.get_prediction_multiple(s)
             
+            #add the second line to the list of options
             print(s)
+            s = s.replace(self.limerick[len(self.limerick)-1], '')
+            print(s)
+            choices.append(s)
+        
+        #return options
+        return(choices)
 
