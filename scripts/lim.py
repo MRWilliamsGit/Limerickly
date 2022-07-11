@@ -1,7 +1,8 @@
 from transformers import RobertaForMaskedLM, RobertaTokenizer
-from datamuse import datamuse as dm
 import torch
 import string
+#import pronouncing
+import requests
 
 
 class limerickly():
@@ -24,18 +25,13 @@ class limerickly():
     # params: word and how many rhymes to return,
     # returns: rhymes as list
     def get_rhymes(self, word, many):
-        
-        #call API for rhymes
-        api = dm.Datamuse()
-        rhymes = api.words(rel_rhy=word, max=many)
 
-        #get just the rhymes as a list
-        r = []
-        for i in rhymes:
-            r.append(i['word'])
-        
-        #return rhymes
-        return r
+        out = requests.get(
+            "https://api.datamuse.com/words", params={"rel_rhy": word}
+        ).json()
+        words = [_["word"] for _ in out]
+
+        return words[:many]
     
     # quick thing to just add line to the limerick in self
     def add_line(self,line):
