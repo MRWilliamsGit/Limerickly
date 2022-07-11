@@ -1,11 +1,8 @@
-import requests
-import datamuse as dm
-
-#from transformers import TFBertForMaskedLM, BertTokenizer
 from transformers import RobertaForMaskedLM, RobertaTokenizer
-#import tensorflow as tf
+from datamuse import datamuse as dm
 import torch
 import string
+
 
 class limerickly():
 
@@ -17,11 +14,9 @@ class limerickly():
   
         if model == None:
             self.model = RobertaForMaskedLM.from_pretrained('roberta-base')
-            #self.model = TFBertForMaskedLM.from_pretrained("bert-large-cased-whole-word-masking")
         
         if tokenizer == None:
             self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
-            #self.tokenizer = BertTokenizer.from_pretrained("bert-large-cased-whole-word-masking")
 
         if limerick == None:
             self.limerick =[]
@@ -64,9 +59,10 @@ class limerickly():
         #get the lenth of the latest line
         lenline = len(line.split())
         #get last word
+        line = line.strip(string.punctuation)
         last = line.split()[-1]
-        last = last.replace(string.punctuation, '')
 
+        print(last)
         #get rhymes for latest word
         rhymes = self.get_rhymes(last, num)
 
@@ -198,9 +194,7 @@ class limerickly():
                 s = self.get_prediction_multiple(s)
             
             #add the second line to the list of options
-            print(s)
             s = s.replace(self.limerick[len(self.limerick)-1], '')
-            print(s)
             choices.append(s)
         
         #return options

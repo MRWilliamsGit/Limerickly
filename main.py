@@ -1,34 +1,57 @@
-from scripts.helpers import get_rhyme
 from scripts.lim import limerickly
 import streamlit as st
 
+
+def writelim():
+    for l in st.session_state.ourlim.limerick:
+        st.write(l)
+
+
+def get_guest_line(text):
+    nextline = st.text_input(text, " ")
+    if nextline != " ":
+        st.session_state.ourlim.add_line(nextline)
+        st.experimental_rerun()
+
+
+def get_robo_line(text):
+    rhymes = st.session_state.ourlim.get_sentences2(5)
+    nextline = st.selectbox(text, rhymes)
+    if nextline != " ":
+        st.session_state.ourlim.add_line(nextline)
+        st.experimental_rerun()
+
+
 def main():
-    lim = limerickly()
 
     st.title("Limerickly")
-    st.write("Let's write a limerick together!")
-    line1 = st.text_input("Start your limerick:", ' ')
+    st.write("🤖 Let's write a limerick together!")
+    st.markdown("""---""")
 
-    if line1 != ' ':
-        lim.add_line(line1)
-        rhymes1 = lim.get_sentences2(5)     
-        choose1 = st.selectbox("Choose your second line:", rhymes1)
+    if "ourlim" not in st.session_state:
+        with st.spinner("assembling the robot..."):
+            st.session_state.ourlim = limerickly()
 
-        if choose1 != ' ':
-            lim.add_line(choose1)
-            line2 = st.text_input("Write a third line:", ' ')
+    writelim()
 
-            if line2 != ' ':
-                lim.add_line(line2)
-                rhymes2 = lim.get_sentences2(5) 
-                choose2 = st.selectbox("Choose your fourth line:", rhymes2)
+    # get which line we are on and proceed accordingly
+    place = len(st.session_state.ourlim.limerick)
 
-                if choose2 != ' ':
-                    lim.add_line(choose2)
-                    line3 = st.text_input("Write the final line...", ' ')
-                    rhymes3 = lim.get_sentences2(5)
-                    choose3 = st.selectbox("Or choose one from the AI:", rhymes3)
-
+    if place == 0:
+        get_guest_line("Start your limerick:")
+    elif place == 1:
+        get_robo_line("Choose a second line:")
+    elif place == 2:
+        get_guest_line("Write a third line:")
+    elif place == 3:
+        get_robo_line("Choose a fourth line:")
+    elif place == 4:
+        get_robo_line("Choose a final line:")
+        get_guest_line("(Or write your own):")
+    elif place == 5:
+        if st.button("Lets do it again!"):
+            del st.session_state.ourlim
+            st.experimental_rerun()
 
 
 if __name__ == "__main__":

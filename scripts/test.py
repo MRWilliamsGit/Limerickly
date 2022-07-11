@@ -1,5 +1,6 @@
-from helpers import get_rhyme
+from scripts.lim import limerickly
 
 def test_api():
-    res = get_rhyme("Cute", 5)
+    lim = limerickly()
+    res = lim.get_rhymes("Cute", 5)
     assert len(res) == 5
