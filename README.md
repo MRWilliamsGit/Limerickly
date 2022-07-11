@@ -1,3 +1,5 @@
+[![Limerickly Test](https://github.com/MRWilliamsGit/Limerickly/actions/workflows/main.yml/badge.svg)](https://github.com/MRWilliamsGit/Limerickly/actions/workflows/main.yml)
+
 # Limerickly
 Build a limerick with an AI poet
 
