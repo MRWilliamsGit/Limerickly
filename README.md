@@ -1,6 +1,11 @@
 # Limerickly
 Build a limerick with an AI poet
 
-## Access the App
+## Data
+This app uses the datamuse api to find rhymes. No other datasources are used.
 
-https://mrwilliamsgit-limerickly-main-fqmats.streamlitapp.com/
+## Modeling
+This app uses a pretrained BERT model to generate rhyming lines.
+
+## Deployment
+To access app: https://mrwilliamsgit-limerickly-main-fqmats.streamlitapp.com/
