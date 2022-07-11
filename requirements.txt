@@ -1,11 +1,9 @@
 black
-pronouncing
 pytest
 pytest-cov
 pylint
 requests
 streamlit
-tensorflow
 torch
 transformers
 
