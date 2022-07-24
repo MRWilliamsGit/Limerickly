@@ -156,21 +156,16 @@ class limerickly():
                     new = self.get_prediction(s)
                     done = s.split("<mask>")[0] + new + s.split("<mask>")[-1]
                     s = done
-                    print(done)
                 #if there are more, do the first and last mask
                 else:
                     #replace first mask with prediction
                     this = s.split("<mask>")[0] + "<mask>"
-                    print(this)
                     new = self.get_prediction(this)
                     s = s.replace("<mask>", new, 1)
-                    print(s)
                     #replace last mask with prediction
                     this = "<mask>" + s.split("<mask>")[-1]
-                    print(this)
                     new = self.get_prediction(this)
                     s = s.replace(this, new + s.split("<mask>")[-1])
-                    print(s)
 
     #params: how many rhymes to get
     #returns: list of choices for second line
