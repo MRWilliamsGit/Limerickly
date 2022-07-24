@@ -12,7 +12,7 @@ def get_guest_line(text):
     if nextline != " ":
         st.session_state.ourlim.add_line(nextline)
         st.experimental_rerun()
-
+    
 
 def get_robo_line(text):
     rhymes = st.session_state.ourlim.get_sentences2(5)
@@ -20,6 +20,16 @@ def get_robo_line(text):
     if nextline != " ":
         st.session_state.ourlim.add_line(nextline)
         st.experimental_rerun()
+
+
+def restart():
+        del st.session_state.ourlim
+        st.experimental_rerun()
+
+
+def button():
+    if st.button("Restart"):
+        restart()
 
 
 def main():
@@ -41,17 +51,22 @@ def main():
         get_guest_line("Start your limerick:")
     elif place == 1:
         get_robo_line("Choose a second line:")
+        button()
     elif place == 2:
         get_guest_line("Write a third line:")
+        button()
     elif place == 3:
         get_robo_line("Choose a fourth line:")
+        button()
     elif place == 4:
         get_robo_line("Choose a final line:")
         get_guest_line("(Or write your own):")
+        button()
     elif place == 5:
+        st.markdown("""---""")
         if st.button("Lets do it again!"):
-            del st.session_state.ourlim
-            st.experimental_rerun()
+            restart()
+
 
 
 if __name__ == "__main__":
