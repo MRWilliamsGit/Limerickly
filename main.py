@@ -12,7 +12,7 @@ def get_guest_line(text):
     if nextline != " ":
         st.session_state.ourlim.add_line(nextline)
         st.experimental_rerun()
-    
+
 
 def get_robo_line(text):
     rhymes = st.session_state.ourlim.get_sentences2(5)
@@ -23,8 +23,8 @@ def get_robo_line(text):
 
 
 def restart():
-        del st.session_state.ourlim
-        st.experimental_rerun()
+    del st.session_state.ourlim
+    st.experimental_rerun()
 
 
 def button():
@@ -66,7 +66,6 @@ def main():
         st.markdown("""---""")
         if st.button("Lets do it again!"):
             restart()
-
 
 
 if __name__ == "__main__":
