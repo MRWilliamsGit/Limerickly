@@ -108,7 +108,6 @@ class limerickly():
     def get_prediction_multiple(self,this):
         #markers for error catching
         ffound = False
-        lfound = False
 
         #tokenize
         token_ids = self.tokenizer.encode(text=this, return_tensors='pt')
@@ -139,16 +138,15 @@ class limerickly():
         #since this function is called inside a loop, it will re-run with a larger pool of predictions
         if ffound == False:
             self.rk=self.rk+5
-            print(self.rk)
             return(this)
 
         #replace last mask with last predicted word (not punctuation or too long)
+        #note that if no acceptable word is found, it will be run from the top and caught by ffound
         new = new[::-1]
         for w in list_of_list[-1]:
             if len(set.intersection(set(w), set(string.punctuation)))==0 & len(w) < 10:
                 w = w[::-1]
                 new = new.replace(">ksam<", w, 1)
-                lfound = True
                 break
         new = new[::-1]
 
