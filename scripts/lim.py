@@ -9,9 +9,12 @@ class limerickly():
     def __init__(self,
         model=None,
         tokenizer=None,
-        limerick=None
+        limerick=None,
+        rk=None
     ):
-  
+        if rk == None:
+            self.rk=5
+
         if model == None:
             self.model = RobertaForMaskedLM.from_pretrained('roberta-base')
         
@@ -48,10 +51,10 @@ class limerickly():
             #get the latest line
             line = self.limerick[lines-1]
         else:
-            #get the latest line
+            #get the third latest line
             line = self.limerick[lines-3]
 
-        #get the lenth of the latest line
+        #get the lenth of the line
         lenline = len(line.split())
         #get last word
         line = line.strip(string.punctuation)
@@ -103,6 +106,9 @@ class limerickly():
     # params: the line with multiple <mask>
     # returns: the line with the first and last mask replaced
     def get_prediction_multiple(self,this):
+        #markers for error catching
+        ffound = False
+        lfound = False
 
         #tokenize
         token_ids = self.tokenizer.encode(text=this, return_tensors='pt')
@@ -114,11 +120,11 @@ class limerickly():
             output = self.model(token_ids)
         last_hidden_state = output[0].squeeze()
 
-        #pull out top five predicted words
+        #pull out top predicted words
         list_of_list =[]
         for index,mask_index in enumerate(masked_pos):
             mask_hidden_state = last_hidden_state[mask_index]
-            idx = torch.topk(mask_hidden_state, k=5, dim=0)[1]
+            idx = torch.topk(mask_hidden_state, k=self.rk, dim=0)[1]
             words = [self.tokenizer.decode(i.item()).strip() for i in idx]
             list_of_list.append(words)
 
@@ -126,18 +132,27 @@ class limerickly():
         for w in list_of_list[0]:
             if len(set.intersection(set(w), set(string.punctuation)))==0 & len(w) < 10:
                 new = this.replace("<mask>", w, 1)
+                ffound = True
                 break
+        
+        #if acceptable word was not found, increase number of predictions and break out of function
+        #since this function is called inside a loop, it will re-run with a larger pool of predictions
+        if ffound == False:
+            self.rk=self.rk+5
+            print(self.rk)
+            return(this)
 
-        #replace last mask with last predicted word
+        #replace last mask with last predicted word (not punctuation or too long)
         new = new[::-1]
         for w in list_of_list[-1]:
             if len(set.intersection(set(w), set(string.punctuation)))==0 & len(w) < 10:
                 w = w[::-1]
                 new = new.replace(">ksam<", w, 1)
+                lfound = True
                 break
         new = new[::-1]
 
-        #return both lines
+        #return line
         return(new)
     
     # params: how many ideas to return
